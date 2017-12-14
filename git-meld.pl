@@ -163,7 +163,7 @@ sub link_files_working_dir($$) {
     foreach my $filename (@$file_list) {
         my $dir = $filename;
         safe_system("mkdir", "-p", dirname("$out_dir/$filename"));
-        safe_system("ln", "-s", cwd() . "/$filename", "$out_dir/$filename");
+        safe_system("cp", "-p", cwd() . "/$filename", "$out_dir/$filename");
     }
 }
 
@@ -222,7 +222,9 @@ safe_system("chmod", "-R", "a-w", "$tmp_dir/");
 my $tool = get_config_or_default("treediff.tool", "meld");
 my $cmd = get_config_or_default("treediff.$tool.cmd", $tool);
 my $path = get_config_or_default("treediff.$tool.path", "");
-safe_system("$path$cmd", "$source_dir", "$dest_dir");
+my $source_dir_w = trim(safe_cmd("cygpath -w $source_dir"));
+my $dest_dir_w = trim(safe_cmd("cygpath -w $dest_dir"));
+safe_system("$path$cmd", "$source_dir_w", "$dest_dir_w");
 
 safe_system("chmod", "-R", "u+w", "$tmp_dir/");
 safe_system("rm", "-Rf", $tmp_dir);
